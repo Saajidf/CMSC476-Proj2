@@ -6,19 +6,21 @@ import timeit
 import math
 
 numOfDocs = 0
-docFreq = {}
 tf = {}
 l1 = []
 
 
-def calc_weight(word, freq):
-    idf = math.log(float(numOfDocs) / float(docFreq[word]))
-    return float(freq) * float(idf)
+def calc_weight(word, total, freq, docfreq):
+    idf = math.log(float(numOfDocs) / float(docfreq[word]))
+    return float(freq / total) * float(idf)
 
 
 if __name__ == '__main__':
     # start timer
     start = timeit.default_timer()
+
+    docFreq = {}
+
     stop_file = open('stopwords.txt', 'r')
     for line in stop_file.readlines():
         for i in line.split('\n'):
@@ -39,7 +41,7 @@ if __name__ == '__main__':
         soup = BeautifulSoup(file.read(), "html.parser")
         file.close()
         justText = soup.get_text()
-        cleanString = re.sub('\W+', ' ', justText)
+        cleanString = re.sub(r'[^\w]', ' ', justText)
 
         newFile = os.path.splitext(x)[0]
 
@@ -58,6 +60,7 @@ if __name__ == '__main__':
                 else:
                     docFreq[y] = 1
 
+        # clean up wordcount
         for k, v in list(wordCount.items()):
             if v == 1:
                 del wordCount[k]
@@ -78,10 +81,11 @@ if __name__ == '__main__':
         # only look at current tf
         name = t
         curr = tf[t]
+        numOfWords = sum(curr.values())
 
         # calc weight of each word in each doc
         for x in curr:
-            weights[x] = calc_weight(x, curr[x])
+            weights[x] = calc_weight(x, numOfWords, curr[x], docFreq)
 
         csv_file = name + '.csv'
         create = "output/" + csv_file
