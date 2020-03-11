@@ -4,33 +4,32 @@ import re
 import csv
 import operator
 import timeit
+import math
 
-def sort_dict_by_key(unsorted_dict):
-    sorted_keys = sorted(unsorted_dict.keys(), key=lambda x: x.lower())
+numOfDocs = 0
+docFreq = {}
+tf = {}
 
-    sorted_dict = {}
-    for key in sorted_keys:
-        sorted_dict.update({key: unsorted_dict[key]})
 
-    return sorted_dict
+def calc_weight(word):
+    idf = math.log(numOfDocs / docFreq[word])
+    return tf * idf
 
 
 if __name__ == '__main__':
-    #start timer
-    start = timeit.default_timer()
-
+    # start timer
+    # start = timeit.default_timer()
+    print('what the')
     files = os.listdir("html_files")
-    numOfFiles = len(files)
-    wordList = dict()
-    numbers = '0123456789'
 
-    #counter is for calculating different times for different number of files
-    # counter = 0
+    # get term frequency, number of files, and doc frequency of each word
     for x in files:
-        # counter += 1
+        wordCount = {}
+        numOfDocs += 1
+
         currFile = "html_files/" + x
 
-        # opens file and stripes html
+        # opens file and strips html
         file = open(currFile)
         soup = BeautifulSoup(file.read(), "html.parser")
         file.close()
@@ -38,33 +37,25 @@ if __name__ == '__main__':
         cleanString = re.sub('\W+', ' ', justText)
 
         newFile = os.path.splitext(x)[0]
-        # writes to txt file
-        create = "text_files/" + newFile + ".txt"
-        os.makedirs(os.path.dirname(create), exist_ok=True)
-        with open(create, "w") as f:
-            f.write(justText)
-        f.close()
 
         for y in cleanString.lower().split():
-            if (y.isnumeric()):
+            if y.isnumeric():
                 continue
-            if y in wordList:
+            if y in wordCount:
                 # Increment count of word by 1
-                wordList[y] = wordList[y] + 1
+                wordCount[y] = wordCount[y] + 1
             else:
                 # Add the word to dictionary with count 1
-                wordList[y] = 1
-        # if counter == 250:
-        #     break
+                wordCount[y] = 1
+                # add to total doc frequency only once per document
+                if y in docFreq:
+                    docFreq[y] = docFreq[y] + 1
+                else:
+                    docFreq[y] = 1
 
-    sortedNum = dict(sorted(wordList.items(), key=operator.itemgetter(1), reverse=True))
-    w = csv.writer(open("quantity.csv", "w"))
-    for key, val in sortedNum.items():
-        w.writerow([key, val])
+        # add term frequency of current file to dictionary of all tf dictionaries
+        tf[newFile] = wordCount
 
-    sortedAlpha = sort_dict_by_key(wordList)
-    z = csv.writer(open("alphabetical.csv", "w"))
-    for key, val in sortedAlpha.items():
-        z.writerow([key, val])
+    print(docFreq['the'])
 
-    print(timeit.default_timer()-start)
+    # print(timeit.default_timer() - start)
