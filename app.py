@@ -31,6 +31,9 @@ if __name__ == '__main__':
 
     # get term frequency, number of files, and doc frequency of each word
     for x in files:
+        # if numOfDocs == 400:
+        #     break
+
         wordCount = {}
         numOfDocs += 1
 
