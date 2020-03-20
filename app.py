@@ -40,7 +40,7 @@ if __name__ == '__main__':
         currFile = "html_files/" + x
 
         # opens file and strips html
-        file = open(currFile)
+        file = open(currFile, encoding="utf8", errors='ignore')
         soup = BeautifulSoup(file.read(), "html.parser")
         file.close()
         justText = soup.get_text()
